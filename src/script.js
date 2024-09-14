@@ -1,6 +1,7 @@
 const counterDOM = document.querySelector("#counter");
 const endDOM = document.querySelector("#end");
 const pauseDOM = document.querySelector(".pause-container");
+const menuDOM = document.querySelector(".main-menu-container");
 
 const scene = new THREE.Scene();
 
@@ -96,12 +97,32 @@ const vechicleColors = [0xFEDC03, 0x7CDA01, 0x0D8DFF, 0xFF950C, 0xB02FF7, 0xF02C
 const threeHeights = [20, 45, 60];
 
 var dead = false;
+var inMenu = true;
 
 var timerCount = 30 + 1;
 var gamePaused = false;
 var remainingTime = 0;
 var endTime = 0;
 var updateTimerReq;
+
+let sfx = {
+    hop1: new Howl({
+        src: ["/src/sfx/hop2.wav"]
+    }),
+    death: new Howl({
+        src: ["/src/sfx/death2.mp3"],
+        volume: 0.05
+    }),
+    click: new Howl({
+        src: ["/src/sfx/button-click.mp3"]
+    })
+}
+
+let bgm = {
+    bgm1: new Howl({
+        src: ["/src/bgm/bgm1.mp3"]
+    })
+}
 
 const initaliseValues = () => {
     lanes = generateLanes();
@@ -124,7 +145,7 @@ const initaliseValues = () => {
     dirLight.position.x = initialDirLightPositionX;
     dirLight.position.y = initialDirLightPositionY;
 
-    startCountdown(timerCount);
+    if(!inMenu) startCountdown(timerCount);
 };
 
 initaliseValues();
@@ -389,7 +410,19 @@ function Lane(index){
     }
 }
 
+document.querySelector(".play-button").addEventListener("click", () => {
+    menuDOM.style.visibility = "hidden";
+    inMenu = false;
+    bgm.bgm1.play();
+    startCountdown(timerCount);
+})
+
+document.querySelector("button").addEventListener("click", () => {
+    sfx.click.play();
+});
+
 document.querySelector(".retry").addEventListener("click", () => {
+    sfx.click.play();
     lanes.forEach((lane) => scene.remove(lane.mesh));
     spawnPlayer();
     endDOM.style.visibility = "hidden";
@@ -398,7 +431,7 @@ document.querySelector(".retry").addEventListener("click", () => {
 
 window.addEventListener("keydown", (event) => {
     if(event.key === "p") pauseGame();
-    if(gamePaused || dead) return;
+    if(gamePaused || dead || inMenu) return;
     if (event.key == "w") move("forward");
     else if (event.key == "s") move("backward");
     else if (event.key == "a") move("left");
@@ -406,6 +439,7 @@ window.addEventListener("keydown", (event) => {
 });
 
 function move(direction) {
+    sfx.hop1.play();
     const finalPositions = moves.reduce(
         (position, move) => {
             if (move === "forward")
@@ -576,6 +610,7 @@ function animate(timestamp) {
             const carMinX = vechicle.position.x - (vechicleLength * zoom) / 2;
             const carMaxX = vechicle.position.x + (vechicleLength * zoom) / 2;
             if (!dead && playerMaxX > carMinX && playerMinX < carMaxX){
+                sfx.death.play();
                 endDOM.style.visibility = "visible";
                 if (!dead) shakeCamera(camera);
                 document.querySelector("#timer").textContent = "0";

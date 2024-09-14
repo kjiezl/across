@@ -6,6 +6,13 @@
 	<link rel="stylesheet" href="./style.css">
 </head>
 <body>
+	<div class="main-menu-container">
+		<!-- <h1>ACROSS</h1> -->
+		<ul class="c-rainbow">
+			<li class="c-rainbow__layer c-rainbow__layer--white">ACROSS</li>
+		   </ul>
+		<button class="play-button">PLAY</button>
+	</div>
 	<div id="counter">0</div>
 	<svg
 		id="timerIcon"
@@ -15,7 +22,7 @@
 		viewBox="0 0 512 512">
 		<path d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120l0 136c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2 280 120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/>
 	</svg>
-	<div id="timer">20</div>
+	<div id="timer">30</div>
 	<div class="pause-container">
 		<h1>GAME PAUSED</h1>
 		<!-- <button class="retry">Retry</button> -->
@@ -26,6 +33,7 @@
 	</div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+	<script src="/src/lib/howler.min.js"></script>
 	<script src="./script.js"></script>
 </body>
 </html>
