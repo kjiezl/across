@@ -90,10 +90,12 @@ scene.add(backLight);
 
 const laneTypes = ["car", "car2", "forest"];
 const laneSpeeds = [2, 2.5, 3];
-const vechicleColors = [0xa52523, 0xbdb638, 0x78b14b];
+// const vechicleColors = [0xa52523, 0xbdb638, 0x78b14b];
+const vechicleColors = [0xFEDC03, 0x7CDA01, 0x0D8DFF, 0xFF950C, 0xB02FF7, 0xF02C03];
 const threeHeights = [20, 45, 60];
 
 var dead = false;
+var timerCount = 30 + 1;
 
 const initaliseValues = () => {
     lanes = generateLanes();
@@ -115,12 +117,15 @@ const initaliseValues = () => {
 
     dirLight.position.x = initialDirLightPositionX;
     dirLight.position.y = initialDirLightPositionY;
+
+    startCountdown(timerCount);
 };
 
 initaliseValues();
 
 const spawnPlayer = () => {
     if (dead) {        
+        dead = false;
         player = new Player();
         scene.add(player);
         
@@ -128,7 +133,6 @@ const spawnPlayer = () => {
         
         dirLight.target = player;
         
-        dead = false;
     }
 };
 
@@ -206,7 +210,7 @@ function Car2() {
 }
 
 function Plant1() {
-    return loadModel('assets/Small Plant.glb', 0x00ff00, 0.2, 0.9, 1 * zoom);
+    return loadModel('assets/Small Plant.glb', 0x00ff00, 0.2, 0.9, 3 * zoom);
 }
 
 function Plant2() {
@@ -565,9 +569,10 @@ function animate(timestamp) {
         lanes[currentLane].vechicles.forEach((vechicle) => {
             const carMinX = vechicle.position.x - (vechicleLength * zoom) / 2;
             const carMaxX = vechicle.position.x + (vechicleLength * zoom) / 2;
-            if (playerMaxX > carMinX && playerMinX < carMaxX){
+            if (!dead && playerMaxX > carMinX && playerMinX < carMaxX){
                 endDOM.style.visibility = "visible";
                 if (!dead) shakeCamera(camera);
+                document.querySelector("#timer").textContent = "0";
                 scene.remove(player);
                 setTimeout(() => {
                     dead = true;
@@ -603,4 +608,30 @@ function shakeCamera(camera, intensity = 10, duration = 1) {
         }
     }
     shake();
+}
+
+function startCountdown(duration) {
+    if(dead) return;
+    const endTime = window.performance.now() + duration * 1000;
+
+    function updateTimer() {
+        const now = window.performance.now();
+        const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+
+        document.querySelector("#timer").textContent = remainingTime;
+
+        if (!dead && remainingTime > 0) {
+            requestAnimationFrame(updateTimer);
+        } else {
+            document.querySelector("#timer").textContent = "0";
+            endDOM.style.visibility = "visible";
+                if (!dead) shakeCamera(camera);
+                scene.remove(player);
+                setTimeout(() => {
+                    dead = true;
+                }, 150);
+        }
+    }
+
+    updateTimer();
 }
