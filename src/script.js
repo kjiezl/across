@@ -1,5 +1,6 @@
-const counterDOM = document.getElementById("counter");
-const endDOM = document.getElementById("end");
+const counterDOM = document.querySelector("#counter");
+const endDOM = document.querySelector("#end");
+const pauseDOM = document.querySelector(".pause-container");
 
 const scene = new THREE.Scene();
 
@@ -95,7 +96,12 @@ const vechicleColors = [0xFEDC03, 0x7CDA01, 0x0D8DFF, 0xFF950C, 0xB02FF7, 0xF02C
 const threeHeights = [20, 45, 60];
 
 var dead = false;
+
 var timerCount = 30 + 1;
+var gamePaused = false;
+var remainingTime = 0;
+var endTime = 0;
+var updateTimerReq;
 
 const initaliseValues = () => {
     lanes = generateLanes();
@@ -354,8 +360,7 @@ function Lane(index){
                 return vechicle;
             });
 
-            this.speed =
-                laneSpeeds[Math.floor(Math.random() * laneSpeeds.length)];
+            this.speed = laneSpeeds[Math.floor(Math.random() * laneSpeeds.length)];
             break;
         }
         case "car2": {
@@ -384,7 +389,7 @@ function Lane(index){
     }
 }
 
-document.querySelector("#retry").addEventListener("click", () => {
+document.querySelector(".retry").addEventListener("click", () => {
     lanes.forEach((lane) => scene.remove(lane.mesh));
     spawnPlayer();
     endDOM.style.visibility = "hidden";
@@ -392,7 +397,8 @@ document.querySelector("#retry").addEventListener("click", () => {
 });
 
 window.addEventListener("keydown", (event) => {
-    if(dead) return;
+    if(event.key === "p") pauseGame();
+    if(gamePaused || dead) return;
     if (event.key == "w") move("forward");
     else if (event.key == "s") move("backward");
     else if (event.key == "a") move("left");
@@ -466,7 +472,7 @@ function animate(timestamp) {
     previousTimestamp = timestamp;
 
     lanes.forEach((lane) => {
-        if (lane.type === "car" || lane.type === "car2") {
+        if ((lane.type === "car" || lane.type === "car2") && !gamePaused) {
             const beforeLane =
                 (-boardWidth * zoom) / 2 - positionWidth * 2 * zoom;
             const afterLane =
@@ -612,16 +618,19 @@ function shakeCamera(camera, intensity = 10, duration = 1) {
 
 function startCountdown(duration) {
     if(dead) return;
-    const endTime = window.performance.now() + duration * 1000;
+    remainingTime = duration;
+    endTime = window.performance.now() + duration * 1000;
 
     function updateTimer() {
+        if(gamePaused) return;
+
         const now = window.performance.now();
-        const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+        remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
 
         document.querySelector("#timer").textContent = remainingTime;
 
         if (!dead && remainingTime > 0) {
-            requestAnimationFrame(updateTimer);
+            updateTimerReq = requestAnimationFrame(updateTimer);
         } else {
             document.querySelector("#timer").textContent = "0";
             endDOM.style.visibility = "visible";
@@ -634,4 +643,18 @@ function startCountdown(duration) {
     }
 
     updateTimer();
+}
+
+function pauseGame(){
+    if(!gamePaused){
+        gamePaused = true;
+        pauseDOM.style.visibility = "visible";
+        if(updateTimerReq) cancelAnimationFrame(updateTimerReq);
+    } else{
+        gamePaused = false;
+        pauseDOM.style.visibility = "hidden";
+        endTime = window.performance.now() + remainingTime * 1000;
+        startCountdown(remainingTime);
+    }
+    
 }
