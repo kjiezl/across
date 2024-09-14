@@ -60,7 +60,7 @@ const addLane = () => {
     lanes.push(lane);
 };
 
-const player = new Player();
+var player = new Player();
 scene.add(player);
 
 hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
@@ -118,6 +118,19 @@ const initaliseValues = () => {
 };
 
 initaliseValues();
+
+const spawnPlayer = () => {
+    if (dead) {        
+        player = new Player();
+        scene.add(player);
+        
+        initaliseValues();
+        
+        dirLight.target = player;
+        
+        dead = false;
+    }
+};
 
 const renderer = new THREE.WebGLRenderer({
     alpha: true,
@@ -361,8 +374,7 @@ function Lane(index){
                 return vechicle;
             });
 
-            this.speed =
-                laneSpeeds[Math.floor(Math.random() * laneSpeeds.length)];
+            this.speed = laneSpeeds[Math.floor(Math.random() * laneSpeeds.length)];
             break;
         }
     }
@@ -370,9 +382,8 @@ function Lane(index){
 
 document.querySelector("#retry").addEventListener("click", () => {
     lanes.forEach((lane) => scene.remove(lane.mesh));
-    initaliseValues();
+    spawnPlayer();
     endDOM.style.visibility = "hidden";
-    dead = false;
     counterDOM.innerHTML = 0;
 });
 
@@ -556,8 +567,11 @@ function animate(timestamp) {
             const carMaxX = vechicle.position.x + (vechicleLength * zoom) / 2;
             if (playerMaxX > carMinX && playerMinX < carMaxX){
                 endDOM.style.visibility = "visible";
-                shakeCamera(camera);
-                dead = true;
+                if (!dead) shakeCamera(camera);
+                scene.remove(player);
+                setTimeout(() => {
+                    dead = true;
+                }, 150);
             }
         });
     }
@@ -566,7 +580,7 @@ function animate(timestamp) {
 
 requestAnimationFrame(animate);
 
-function shakeCamera(camera, intensity = 5, duration = 1) {
+function shakeCamera(camera, intensity = 10, duration = 1) {
     const startPosition = camera.position.clone();
     const shakeStart = Date.now();
 
