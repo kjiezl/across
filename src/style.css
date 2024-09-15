@@ -61,9 +61,14 @@ button{
         color: white;
         font-size: 2em;
         position: absolute;
-        transform: translateY(-200%);
+        transform: translateY(-300%);
         pointer-events: none;
         text-shadow: 5px 10px #111;
+    }
+
+    p{
+        position: absolute;
+        transform: translateY(-200%);
     }
 }
 
@@ -97,7 +102,7 @@ button{
         color: white;
         font-size: 2em;
         position: absolute;
-        transform: translateY(-200%);
+        transform: translateY(-300%);
         pointer-events: none;
         text-shadow: 5px 10px #111;
     }
@@ -175,9 +180,14 @@ button{
         color: white;
         font-size: 2em;
         position: absolute;
-        transform: translateY(-200%);
+        transform: translateY(-300%);
         pointer-events: none;
         text-shadow: 5px 10px #111;
+    }
+
+    p{
+        position: absolute;
+        transform: translateY(-250%);
     }
 }
 

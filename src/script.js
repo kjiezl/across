@@ -639,6 +639,7 @@ requestAnimationFrame(animate);
 function gameOver(){
     sfx.death.play();
     endDOM.css("visibility", "visible");
+    $(".score-text").text(counterDOM.text());
     if (!dead) shakeCamera(camera);
     $("#timer").text("0");
     scene.remove(player);
@@ -741,6 +742,7 @@ function countdownReached(){
     sfx.timerSFX.stop();
     sfx.timerEnd.play();
     timerEndDOM.css("visibility", "visible");
+    $(".score-text").text(counterDOM.text());
     $("#timer").text("0");
     scene.remove(player);
     setTimeout(() => {
