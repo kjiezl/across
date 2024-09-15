@@ -97,6 +97,8 @@ const laneSpeeds = [2, 2.5, 3];
 const vechicleColors = [0xFEDC03, 0x7CDA01, 0x0D8DFF, 0xFF950C, 0xB02FF7, 0xF02C03];
 const threeHeights = [20, 45, 60];
 
+var laneGoal = [];
+
 var dead = false;
 var inMenu = true;
 var timerEnded = false;
@@ -126,6 +128,9 @@ let sfx = {
     }),
     timerSFX: new Howl({
         src: ["/src/sfx/timer-count.mp3"]
+    }),
+    laneReachedSFX: new Howl({
+        src: ["/src/sfx/lane-reached.mp3"]
     })
 }
 
@@ -157,6 +162,13 @@ const initaliseValues = () => {
     dirLight.position.y = initialDirLightPositionY;
 
     if(!inMenu) startCountdown(timerCount);
+
+    for (let i = 1; i <= 300; i++) {
+        if (i % 50 === 0) {
+            laneGoal.push(i);
+        }
+    }
+    laneReached(laneGoal);
 };
 
 initaliseValues();
@@ -311,6 +323,27 @@ function Grass() {
     return grass;
 }
 
+function laneReached() {
+    const lineMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        opacity: 0.25,
+        transparent: true,
+        depthWrite: false,
+    });
+
+    laneGoal.forEach((lane) => {
+        const lineGeometry = new THREE.PlaneBufferGeometry(boardWidth * zoom, 10 * zoom);
+        const whiteLine = new THREE.Mesh(lineGeometry, lineMaterial);
+    
+        whiteLine.position.y = lane * positionWidth * zoom;
+        whiteLine.position.z = 10 * zoom;
+    
+        whiteLine.userData.isNonInteractive = true; 
+    
+        scene.add(whiteLine);
+    })
+}
+
 function Lane(index){
     this.index = index;
     this.type =
@@ -456,6 +489,12 @@ $(window).keydown((event) => {
 })
 
 function move(direction) {
+    for(let i = 0; i <= laneGoal.length; i++){
+        if(counterDOM.text() == laneGoal[i]){
+            if(!sfx.laneReachedSFX.playing()) sfx.laneReachedSFX.play();
+        }
+    }
+    
     sfx.hop1.play();
     const finalPositions = moves.reduce(
         (position, move) => {
