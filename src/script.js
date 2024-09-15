@@ -1,7 +1,8 @@
-const counterDOM = document.querySelector("#counter");
-const endDOM = document.querySelector("#end");
-const pauseDOM = document.querySelector(".pause-container");
-const menuDOM = document.querySelector(".main-menu-container");
+const counterDOM = $("#counter");
+const endDOM = $("#end");
+const pauseDOM = $(".pause-container");
+const menuDOM = $(".main-menu-container");
+const timerEndDOM = $(".timer-end-container");
 
 const scene = new THREE.Scene();
 
@@ -98,6 +99,7 @@ const threeHeights = [20, 45, 60];
 
 var dead = false;
 var inMenu = true;
+var timerEnded = false;
 
 var timerCount = 30 + 1;
 var gamePaused = false;
@@ -111,10 +113,19 @@ let sfx = {
     }),
     death: new Howl({
         src: ["/src/sfx/death2.mp3"],
-        volume: 0.05
+        volume: 0.1
     }),
     click: new Howl({
         src: ["/src/sfx/button-click.mp3"]
+    }),
+    pause: new Howl({
+        src: ["/src/sfx/pause.wav"]
+    }),
+    timerEnd: new Howl({
+        src: ["/src/sfx/timer-end.mp3"]
+    }),
+    timerSFX: new Howl({
+        src: ["/src/sfx/timer-count.mp3"]
     })
 }
 
@@ -167,6 +178,7 @@ const renderer = new THREE.WebGLRenderer({
     alpha: true,
     antialias: true
 });
+
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -410,33 +422,38 @@ function Lane(index){
     }
 }
 
-document.querySelector(".play-button").addEventListener("click", () => {
-    menuDOM.style.visibility = "hidden";
+$(".play-button").click(() => {
+    menuDOM.css("visibility", "hidden");
     inMenu = false;
     bgm.bgm1.play();
     startCountdown(timerCount);
 })
 
-document.querySelector("button").addEventListener("click", () => {
-    sfx.click.play();
-});
+$(".resume-button").click(pauseGame);
 
-document.querySelector(".retry").addEventListener("click", () => {
-    sfx.click.play();
-    lanes.forEach((lane) => scene.remove(lane.mesh));
-    spawnPlayer();
-    endDOM.style.visibility = "hidden";
-    counterDOM.innerHTML = 0;
-});
+$("button, .musicOn, .musicOff").click(() => {sfx.click.play()});
 
-window.addEventListener("keydown", (event) => {
+$(".music-toggle").click(() => {
+    bgm.bgm1.playing() ? bgm.bgm1.pause() : bgm.bgm1.play();
+    $(".musicOn").toggle();
+    $(".musicOff").toggle();
+})
+
+$(window).keydown((event) => {
+    if(event.code === "Space"){
+        menuDOM.css("visibility", "hidden");
+        inMenu = false;
+        if(!bgm.bgm1.playing()) bgm.bgm1.play();
+        startCountdown(timerCount);
+    }
+    if(inMenu) return;
     if(event.key === "p") pauseGame();
-    if(gamePaused || dead || inMenu) return;
+    if(gamePaused || dead) return;
     if (event.key == "w") move("forward");
     else if (event.key == "s") move("backward");
     else if (event.key == "a") move("left");
     else if (event.key == "d") move("right");
-});
+})
 
 function move(direction) {
     sfx.hop1.play();
@@ -580,12 +597,12 @@ function animate(timestamp) {
             switch (moves[0]) {
                 case "forward": {
                     currentLane++;
-                    counterDOM.innerHTML = currentLane;
+                    counterDOM.text(currentLane);
                     break;
                 }
                 case "backward": {
                     currentLane--;
-                    counterDOM.innerHTML = currentLane;
+                    counterDOM.text(currentLane);
                     break;
                 }
                 case "left": {
@@ -610,14 +627,7 @@ function animate(timestamp) {
             const carMinX = vechicle.position.x - (vechicleLength * zoom) / 2;
             const carMaxX = vechicle.position.x + (vechicleLength * zoom) / 2;
             if (!dead && playerMaxX > carMinX && playerMinX < carMaxX){
-                sfx.death.play();
-                endDOM.style.visibility = "visible";
-                if (!dead) shakeCamera(camera);
-                document.querySelector("#timer").textContent = "0";
-                scene.remove(player);
-                setTimeout(() => {
-                    dead = true;
-                }, 150);
+                gameOver();
             }
         });
     }
@@ -625,6 +635,32 @@ function animate(timestamp) {
 }
 
 requestAnimationFrame(animate);
+
+function gameOver(){
+    sfx.death.play();
+    endDOM.css("visibility", "visible");
+    if (!dead) shakeCamera(camera);
+    $("#timer").text("0");
+    scene.remove(player);
+    setTimeout(() => {
+        dead = true;
+    }, 150);
+}
+
+function restartGame(){
+    sfx.click.play();
+    if(gamePaused){
+        scene.remove(player);
+        dead = true;
+        pauseGame();
+        pauseDOM.css("visiblity", "hidden");
+    }
+    lanes.forEach((lane) => scene.remove(lane.mesh));
+    spawnPlayer();
+    timerEnded ? timerEndDOM.css("visibility", "hidden") : endDOM.css("visibility", "hidden");
+    timerEnded = false;
+    counterDOM.text(0);
+}
 
 function shakeCamera(camera, intensity = 10, duration = 1) {
     const startPosition = camera.position.clone();
@@ -652,28 +688,30 @@ function shakeCamera(camera, intensity = 10, duration = 1) {
 }
 
 function startCountdown(duration) {
-    if(dead) return;
     remainingTime = duration;
     endTime = window.performance.now() + duration * 1000;
 
     function updateTimer() {
         if(gamePaused) return;
+        if(dead){
+            sfx.timerSFX.stop();
+            return; 
+        }
 
         const now = window.performance.now();
         remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
 
-        document.querySelector("#timer").textContent = remainingTime;
+        $("#timer").text(remainingTime);
 
         if (!dead && remainingTime > 0) {
             updateTimerReq = requestAnimationFrame(updateTimer);
+            if(remainingTime < 12 && remainingTime > 0){
+                if(!sfx.timerSFX.playing() && !dead){
+                    sfx.timerSFX.play();
+                }
+            }
         } else {
-            document.querySelector("#timer").textContent = "0";
-            endDOM.style.visibility = "visible";
-                if (!dead) shakeCamera(camera);
-                scene.remove(player);
-                setTimeout(() => {
-                    dead = true;
-                }, 150);
+            countdownReached();
         }
     }
 
@@ -681,15 +719,31 @@ function startCountdown(duration) {
 }
 
 function pauseGame(){
+    sfx.pause.play();
     if(!gamePaused){
         gamePaused = true;
-        pauseDOM.style.visibility = "visible";
+        if(sfx.timerSFX.stop());
+        pauseDOM.css("visibility", "visible");
         if(updateTimerReq) cancelAnimationFrame(updateTimerReq);
     } else{
         gamePaused = false;
-        pauseDOM.style.visibility = "hidden";
+        if(sfx.timerSFX.play());
+        pauseDOM.css("visibility", "hidden");
         endTime = window.performance.now() + remainingTime * 1000;
         startCountdown(remainingTime);
     }
     
+}
+
+function countdownReached(){
+    if(dead) return;
+    timerEnded = true;
+    sfx.timerSFX.stop();
+    sfx.timerEnd.play();
+    timerEndDOM.css("visibility", "visible");
+    $("#timer").text("0");
+    scene.remove(player);
+    setTimeout(() => {
+        dead = true;
+    }, 150);
 }
