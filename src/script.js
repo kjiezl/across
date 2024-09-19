@@ -110,6 +110,13 @@ var remainingTime = 0;
 var endTime = 0;
 var updateTimerReq;
 
+var price = 15;
+var prizePercentage = 35;
+var minPercentage = 10;
+var decreaseRate = 5;
+var perPlayer = 10;
+var playedCount = 0;
+
 let sfx = {
     hop1: new Howl({
         src: ["/src/sfx/hop2.wav"]
@@ -482,8 +489,10 @@ $(window).keydown((event) => {
         if(!bgm.bgm1.playing()) bgm.bgm1.play();
         startCountdown(timerCount);
     }
+    if(event.key === "-") playedCount--;
+    if(event.key === "=") playedCount++;
     if(inMenu) return;
-    if(event.key === "p") pauseGame();
+    if(event.key == "p") pauseGame();
     if(gamePaused || dead) return;
     if (event.key == "w") move("forward");
     else if (event.key == "s") move("backward");
@@ -674,6 +683,10 @@ function animate(timestamp) {
         });
     }
     renderer.render(scene, camera);
+
+    let result = calculatePrizeAmount(playedCount);
+    prizeAmountDOM.text(Math.floor(result.prizeAmount));
+    playerCountDOM.text(playedCount);
 }
 
 requestAnimationFrame(animate);
@@ -805,4 +818,32 @@ function countdownReached(){
     setTimeout(() => {
         dead = true;
     }, 150);
+}
+
+function calculateTotalAmount(players) {
+    return players * price;
+}
+
+function calculatePrizeAmount(players) {
+    let tiers = Math.floor(players / perPlayer);
+    
+    let currentPrizePercentage = prizePercentage - (tiers * decreaseRate);
+    
+    if (currentPrizePercentage < minPercentage) {
+        currentPrizePercentage = minPercentage;
+    }
+
+    let totalAmount = calculateTotalAmount(players);
+    let prizeAmount = (totalAmount * currentPrizePercentage) / 100;
+
+    let earned = totalAmount - prizeAmount;
+    let myEarn = earned * 0.50;
+    
+    return {
+        prizeAmount: prizeAmount,
+        totalAmount: totalAmount,
+        prizePercentage: currentPrizePercentage,
+        moneyEarned: earned,
+        myEarn: myEarn
+    };
 }
