@@ -3,6 +3,8 @@ const endDOM = $("#end");
 const pauseDOM = $(".pause-container");
 const menuDOM = $(".main-menu-container");
 const timerEndDOM = $(".timer-end-container");
+const prizeAmountDOM = $("#prize-amount");
+const playerCountDOM = $("#player-count");
 
 const scene = new THREE.Scene();
 
@@ -93,7 +95,6 @@ scene.add(backLight);
 
 const laneTypes = ["car", "car2", "forest"];
 const laneSpeeds = [2, 2.5, 3];
-// const vechicleColors = [0xa52523, 0xbdb638, 0x78b14b];
 const vechicleColors = [0xFEDC03, 0x7CDA01, 0x0D8DFF, 0xFF950C, 0xB02FF7, 0xF02C03];
 const threeHeights = [20, 45, 60];
 
@@ -164,7 +165,7 @@ const initaliseValues = () => {
     if(!inMenu) startCountdown(timerCount);
 
     for (let i = 1; i <= 300; i++) {
-        if (i % 50 === 0) {
+        if (i % 100 === 0) {
             laneGoal.push(i);
         }
     }
@@ -458,7 +459,7 @@ function Lane(index){
 $(".play-button").click(() => {
     menuDOM.css("visibility", "hidden");
     inMenu = false;
-    bgm.bgm1.play();
+    if(!bgm.bgm1.playing()) bgm.bgm1.play();
     startCountdown(timerCount);
 })
 
@@ -472,8 +473,10 @@ $(".music-toggle").click(() => {
     $(".musicOff").toggle();
 })
 
+$(".main-menu-button").click(gotoMenu);
+
 $(window).keydown((event) => {
-    if(event.code === "Space"){
+    if(event.code === "Space" && inMenu){
         menuDOM.css("visibility", "hidden");
         inMenu = false;
         if(!bgm.bgm1.playing()) bgm.bgm1.play();
@@ -685,6 +688,21 @@ function gameOver(){
     setTimeout(() => {
         dead = true;
     }, 150);
+}
+
+function gotoMenu(){
+    endDOM.css("visibility", "hidden");
+    if(sfx.timerSFX.playing) sfx.timerSFX.stop();
+    menuDOM.css("visibility", "visible");
+    inMenu = true;
+    if(bgm.bgm1.playing()){
+        bgm.bgm1.stop();
+    } else{
+        $(".musicOn").toggle();
+        $(".musicOff").toggle();
+    }
+    $("#timer").text(timerCount - 1);
+    restartGame();
 }
 
 function restartGame(){
