@@ -5,7 +5,7 @@ const endDOM = $("#end");
 const pauseDOM = $(".pause-container");
 const menuDOM = $(".main-menu-container");
 const timerEndDOM = $(".timer-end-container");
-const prizeAmountDOM = $("#prize-amount");
+// const prizeAmountDOM = $("#prize-amount");
 const playerCountDOM = $("#player-count");
 
 const scene = new THREE.Scene();
@@ -113,12 +113,12 @@ var remainingTime = 0;
 var endTime = 0;
 var updateTimerReq;
 
-var price = 15;
-var prizePercentage = 35;
-var minPercentage = 10;
-var decreaseRate = 5;
-var perPlayer = 10;
-var playedCount = 0;
+// var price = 15;
+// var prizePercentage = 35;
+// var minPercentage = 10;
+// var decreaseRate = 5;
+// var perPlayer = 10;
+// var playedCount = 0;
 
 let sfx = {
     hop1: new Howl({
@@ -484,7 +484,7 @@ function Lane(index){
     }
 }
 
-$(".play-button").click(startGame);
+// $(".play-button").click(startGame);
 
 function startGame(goal, countdown){
     laneGoal = [];   
@@ -511,19 +511,19 @@ $(".music-toggle").click(() => {
 
 $(".main-menu-button").click(gotoMenu);
 
-$(".level1-button").click(() => {startGame(10, 30)})
-$(".level2-button").click(() => {startGame(20, 45)})
-$(".level3-button").click(() => {startGame(30, 60)})
+$(".level1-button").click(() => {startGame(50, 30)})
+$(".level2-button").click(() => {startGame(100, 45)})
+$(".level3-button").click(() => {startGame(140, 60)})
 
 $(window).keydown((event) => {
-    if(event.code === "Space" && inMenu){
-        menuDOM.css("visibility", "hidden");
-        inMenu = false;
-        if(!bgm.bgm1.playing()) bgm.bgm1.play();
-        startCountdown(timerCount);
-    }
-    if(event.key === "-") playedCount--;
-    if(event.key === "=") playedCount++;
+    // if(event.code === "Space" && inMenu){
+    //     menuDOM.css("visibility", "hidden");
+    //     inMenu = false;
+    //     if(!bgm.bgm1.playing()) bgm.bgm1.play();
+    //     startCountdown(timerCount);
+    // }
+    // if(event.key === "-") playedCount--;
+    // if(event.key === "=") playedCount++;
     if(inMenu) return;
     if(event.key == "p") pauseGame();
     if(gamePaused || dead) return;
@@ -717,9 +717,9 @@ function animate(timestamp) {
     }
     renderer.render(scene, camera);
 
-    let result = calculatePrizeAmount(playedCount);
-    prizeAmountDOM.text("P " + Math.floor(result.prizeAmount));
-    playerCountDOM.text(playedCount);
+    // let result = calculatePrizeAmount(playedCount);
+    // prizeAmountDOM.text("P " + Math.floor(result.prizeAmount));
+    // playerCountDOM.text(playedCount);
 }
 
 requestAnimationFrame(animate);
@@ -853,30 +853,30 @@ function countdownReached(){
     }, 150);
 }
 
-function calculateTotalAmount(players) {
-    return players * price;
-}
+// function calculateTotalAmount(players) {
+//     return players * price;
+// }
 
-function calculatePrizeAmount(players) {
-    let tiers = Math.floor(players / perPlayer);
+// function calculatePrizeAmount(players) {
+//     let tiers = Math.floor(players / perPlayer);
     
-    let currentPrizePercentage = prizePercentage - (tiers * decreaseRate);
+//     let currentPrizePercentage = prizePercentage - (tiers * decreaseRate);
     
-    if (currentPrizePercentage < minPercentage) {
-        currentPrizePercentage = minPercentage;
-    }
+//     if (currentPrizePercentage < minPercentage) {
+//         currentPrizePercentage = minPercentage;
+//     }
 
-    let totalAmount = calculateTotalAmount(players);
-    let prizeAmount = (totalAmount * currentPrizePercentage) / 100;
+//     let totalAmount = calculateTotalAmount(players);
+//     let prizeAmount = (totalAmount * currentPrizePercentage) / 100;
 
-    let earned = totalAmount - prizeAmount;
-    let myEarn = earned * 0.50;
+//     let earned = totalAmount - prizeAmount;
+//     let myEarn = earned * 0.50;
     
-    return {
-        prizeAmount: prizeAmount,
-        totalAmount: totalAmount,
-        prizePercentage: currentPrizePercentage,
-        moneyEarned: earned,
-        myEarn: myEarn
-    };
-}
+//     return {
+//         prizeAmount: prizeAmount,
+//         totalAmount: totalAmount,
+//         prizePercentage: currentPrizePercentage,
+//         moneyEarned: earned,
+//         myEarn: myEarn
+//     };
+// }

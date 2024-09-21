@@ -8,12 +8,25 @@
 <body>
 	<div class="main-menu-container">
 		<ul class="c-rainbow">
-			<li class="c-rainbow__layer c-rainbow__layer--white">ACROSS</li>
-		   </ul>
+			<li class="c-rainbow__layer c-rainbow__layer--white" 
+				style="pointer-events: none;"
+				>ACROSS</li>
+		</ul>
+		<div class="level-buttons-container">
+			<div class="level1-container">
+				<p>Goal: 50 &nbsp Time: 30s</p>
+				<button class="level1-button">PLAY</button>
+			 </div>
+			 <div class="level2-container">
+				<p>Goal: 100 &nbsp Time: 45s</p>
+				<button class="level2-button">PLAY</button>
+			 </div>
+			 <div class="level3-container">
+				<p>Goal: 140 &nbsp Time: 60s</p>
+				<button class="level3-button">PLAY</button>
+			 </div>
+		</div>
 		<!-- <button class="play-button">PLAY</button> -->
-		<button class="level1-button">50</button>
-		<button class="level2-button">100</button>
-		<button class="level3-button">200</button>
 	</div>
 	<div id="counter">0</div>
 	<svg
@@ -76,9 +89,9 @@
 		<p>SCORE: <span class="score-text">0</span></p>
 		<button class="retry" onclick="restartGame()">RETRY</button>
 	</div>
-	<div class="prize-container">
+	<!-- <div class="prize-container">
 		<p>(<span id="player-count"></span>) PRIZE OBTAINABLE: <span id="prize-amount"></span></p>
-	</div>
+	</div> -->
 	<script src="/src/lib/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>

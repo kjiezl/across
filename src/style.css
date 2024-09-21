@@ -176,34 +176,54 @@ button{
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     flex-direction: column;
 
-    .level2-button{
-        background-color: rgb(194, 196, 43);
-        color: #424107;
+    .level-buttons-container{
+        position: absolute;
+        margin-top: 200px;
     }
 
-    .level3-button{
-        background-color: rgb(196, 43, 43);
-        color: #421307;
+    .level1-container, .level2-container, .level3-container{
+        display: flex;
+        flex-direction: row;
+    
+        p{
+            margin-top: 45px;
+            margin-right: 50px;
+            pointer-events: none;
+            font-size: 0.75em;
+        }
     }
 
     button{
-        background-color: rgb(43, 196, 81);
         padding: 20px 50px 20px 50px;
         font-family: inherit;
-        font-size: inherit;
-        color:#074219;
-        transform: scale(1) translateY(150%);
+        font-size: 0.75em;
+        transform: scale(1);
         transition: transform 300ms, filter 300ms;
         margin: 20px;
         
         &:hover{
-            transform: scale(1.15) translateY(150%);
+            transform: scale(1.15);
             filter: brightness(1.3);
         }
+    }
+
+    .level1-button{
+        background-color: rgb(43, 196, 81);
+        color:#074219;
+        }
+    
+    .level2-button{
+        background-color: rgb(194, 196, 43);
+        color: #424107;
+    }
+    
+    .level3-button{
+        background-color: rgb(196, 43, 43);
+        color: #421307;
     }
 }
 
@@ -239,7 +259,7 @@ button{
     list-style: none;
     padding: 0;
     margin: 0;
-    transform: translateY(-200%);
+    transform: translateY(-250%);
 }
 .c-rainbow__layer {
     --text-color: #fff;
