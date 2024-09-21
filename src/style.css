@@ -22,6 +22,7 @@ button{
     position: absolute;
     font-size: 10px;
     padding: 5px;
+    visibility: hidden;
 }
 
 #player-count{
@@ -177,6 +178,17 @@ button{
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.4);
     visibility: visible;
+    flex-direction: column;
+
+    .level2-button{
+        background-color: rgb(194, 196, 43);
+        color: #424107;
+    }
+
+    .level3-button{
+        background-color: rgb(196, 43, 43);
+        color: #421307;
+    }
 
     button{
         background-color: rgb(43, 196, 81);
@@ -184,11 +196,12 @@ button{
         font-family: inherit;
         font-size: inherit;
         color:#074219;
-        transform: scale(1) translateY(30%);
+        transform: scale(1) translateY(150%);
         transition: transform 300ms, filter 300ms;
+        margin: 20px;
         
         &:hover{
-            transform: scale(1.15) translateY(30%);
+            transform: scale(1.15) translateY(150%);
             filter: brightness(1.3);
         }
     }

@@ -1,3 +1,5 @@
+"strict mode";
+
 const counterDOM = $("#counter");
 const endDOM = $("#end");
 const pauseDOM = $(".pause-container");
@@ -99,12 +101,13 @@ const vechicleColors = [0xFEDC03, 0x7CDA01, 0x0D8DFF, 0xFF950C, 0xB02FF7, 0xF02C
 const threeHeights = [20, 45, 60];
 
 var laneGoal = [];
+var laneGoalNum;
 
 var dead = false;
 var inMenu = true;
 var timerEnded = false;
 
-var timerCount = 30 + 1;
+var timerCount;
 var gamePaused = false;
 var remainingTime = 0;
 var endTime = 0;
@@ -148,7 +151,7 @@ let bgm = {
     })
 }
 
-const initaliseValues = () => {
+const initializeValues = () => {
     lanes = generateLanes();
 
     currentLane = 0;
@@ -171,15 +174,15 @@ const initaliseValues = () => {
 
     if(!inMenu) startCountdown(timerCount);
 
-    for (let i = 1; i <= 300; i++) {
-        if (i % 100 === 0) {
-            laneGoal.push(i);
-        }
-    }
-    laneReached(laneGoal);
+    // for (let i = 1; i <= 300 + 1; i++) {
+    //     if (i % laneGoalNum === 0) {
+    //         laneGoal.push(i);
+    //     }
+    // }
+    // laneReached(laneGoal);
 };
 
-initaliseValues();
+initializeValues();
 
 const spawnPlayer = () => {
     if (dead) {        
@@ -187,7 +190,7 @@ const spawnPlayer = () => {
         player = new Player();
         scene.add(player);
         
-        initaliseValues();
+        initializeValues();
         
         dirLight.target = player;
         
@@ -347,10 +350,28 @@ function laneReached() {
         whiteLine.position.z = 10 * zoom;
     
         whiteLine.userData.isNonInteractive = true; 
+        whiteLine.userData.isWhiteLine = true;
     
         scene.add(whiteLine);
     })
 }
+
+function clearLines() {
+    const whiteLinesToRemove = [];
+
+    scene.traverse((object) => {
+        if (object.userData.isWhiteLine) {
+            whiteLinesToRemove.push(object);
+        }
+    });
+
+    whiteLinesToRemove.forEach((whiteLine) => {
+        scene.remove(whiteLine);
+        whiteLine.geometry.dispose();
+        whiteLine.material.dispose();
+    });
+}
+
 
 function Lane(index){
     this.index = index;
@@ -463,12 +484,20 @@ function Lane(index){
     }
 }
 
-$(".play-button").click(() => {
+$(".play-button").click(startGame);
+
+function startGame(goal, countdown){
+    laneGoal = [];   
+    clearLines();
+    laneGoalNum = goal;
+    timerCount = (countdown + 1);
     menuDOM.css("visibility", "hidden");
     inMenu = false;
     if(!bgm.bgm1.playing()) bgm.bgm1.play();
+    laneGoal.push(laneGoalNum);
+    laneReached(laneGoal);
     startCountdown(timerCount);
-})
+}
 
 $(".resume-button").click(pauseGame);
 
@@ -482,6 +511,10 @@ $(".music-toggle").click(() => {
 
 $(".main-menu-button").click(gotoMenu);
 
+$(".level1-button").click(() => {startGame(10, 30)})
+$(".level2-button").click(() => {startGame(20, 45)})
+$(".level3-button").click(() => {startGame(30, 60)})
+
 $(window).keydown((event) => {
     if(event.code === "Space" && inMenu){
         menuDOM.css("visibility", "hidden");
@@ -494,10 +527,10 @@ $(window).keydown((event) => {
     if(inMenu) return;
     if(event.key == "p") pauseGame();
     if(gamePaused || dead) return;
-    if (event.key == "w") move("forward");
-    else if (event.key == "s") move("backward");
-    else if (event.key == "a") move("left");
-    else if (event.key == "d") move("right");
+    if (event.key == "w" || event.key == "ArrowUp") move("forward");
+    else if (event.key == "s" || event.key == "ArrowDown") move("backward");
+    else if (event.key == "a" || event.key == "ArrowLeft") move("left");
+    else if (event.key == "d" || event.key == "ArrowRight") move("right");
 })
 
 function move(direction) {
@@ -685,7 +718,7 @@ function animate(timestamp) {
     renderer.render(scene, camera);
 
     let result = calculatePrizeAmount(playedCount);
-    prizeAmountDOM.text(Math.floor(result.prizeAmount));
+    prizeAmountDOM.text("P " + Math.floor(result.prizeAmount));
     playerCountDOM.text(playedCount);
 }
 
