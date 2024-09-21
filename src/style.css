@@ -194,6 +194,7 @@ button{
             margin-right: 50px;
             pointer-events: none;
             font-size: 0.75em;
+            text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
         }
     }
 
@@ -214,7 +215,7 @@ button{
     .level1-button{
         background-color: rgb(43, 196, 81);
         color:#074219;
-        }
+    }
     
     .level2-button{
         background-color: rgb(194, 196, 43);
@@ -250,6 +251,16 @@ button{
         position: absolute;
         transform: translateY(-250%);
     }
+}
+
+.countdown-start{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3em;
+    text-shadow: 7px 7px rgba(0, 0, 0, 0.5);
+    visibility: hidden;
 }
 
 .c-rainbow {

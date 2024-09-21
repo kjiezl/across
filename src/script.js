@@ -106,6 +106,7 @@ var laneGoalNum;
 var dead = false;
 var inMenu = true;
 var timerEnded = false;
+var inCountdown = false;
 
 var timerCount;
 var gamePaused = false;
@@ -172,7 +173,7 @@ const initializeValues = () => {
     dirLight.position.x = initialDirLightPositionX;
     dirLight.position.y = initialDirLightPositionY;
 
-    if(!inMenu) startCountdown(timerCount);
+    if(!inMenu) startTimer(timerCount);
 
     // for (let i = 1; i <= 300 + 1; i++) {
     //     if (i % laneGoalNum === 0) {
@@ -487,16 +488,17 @@ function Lane(index){
 // $(".play-button").click(startGame);
 
 function startGame(goal, countdown){
+    $(".countdown-start").css("visibility", "hidden");
     laneGoal = [];   
     clearLines();
     laneGoalNum = goal;
     timerCount = (countdown + 1);
-    menuDOM.css("visibility", "hidden");
     inMenu = false;
     if(!bgm.bgm1.playing()) bgm.bgm1.play();
+    sfx.timerSFX.stop();
     laneGoal.push(laneGoalNum);
     laneReached(laneGoal);
-    startCountdown(timerCount);
+    startTimer(timerCount);
 }
 
 $(".resume-button").click(pauseGame);
@@ -511,16 +513,16 @@ $(".music-toggle").click(() => {
 
 $(".main-menu-button").click(gotoMenu);
 
-$(".level1-button").click(() => {startGame(50, 30)})
-$(".level2-button").click(() => {startGame(100, 45)})
-$(".level3-button").click(() => {startGame(140, 60)})
+$(".level1-button").click(() => {startCountdown(50, 30)})
+$(".level2-button").click(() => {startCountdown(100, 45)})
+$(".level3-button").click(() => {startCountdown(140, 60)})
 
 $(window).keydown((event) => {
     // if(event.code === "Space" && inMenu){
     //     menuDOM.css("visibility", "hidden");
     //     inMenu = false;
     //     if(!bgm.bgm1.playing()) bgm.bgm1.play();
-    //     startCountdown(timerCount);
+    //     startTimer(timerCount);
     // }
     // if(event.key === "-") playedCount--;
     // if(event.key === "=") playedCount++;
@@ -791,7 +793,7 @@ function shakeCamera(camera, intensity = 10, duration = 1) {
     shake();
 }
 
-function startCountdown(duration) {
+function startTimer(duration) {
     remainingTime = duration;
     endTime = window.performance.now() + duration * 1000;
 
@@ -822,6 +824,32 @@ function startCountdown(duration) {
     updateTimer();
 }
 
+function startCountdown(lane, time, duration = 4) {
+    menuDOM.css("visibility", "hidden");
+    $(".countdown-start").css("visibility", "visible");
+    sfx.timerSFX.play();
+
+    remainingTime = duration;
+    endTime = window.performance.now() + duration * 1000;
+
+    function updateTimer() {
+        if(gamePaused) return;
+
+        const now = window.performance.now();
+        remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+
+        $(".countdown-start").text(remainingTime);
+
+        if (remainingTime > 0) {
+            updateTimerReq = requestAnimationFrame(updateTimer);
+        } else {
+            startGame(lane, time);
+        }
+    }
+
+    updateTimer();
+}
+
 function pauseGame(){
     sfx.pause.play();
     if(!gamePaused){
@@ -834,7 +862,7 @@ function pauseGame(){
         if(sfx.timerSFX.play());
         pauseDOM.css("visibility", "hidden");
         endTime = window.performance.now() + remainingTime * 1000;
-        startCountdown(remainingTime);
+        startTimer(remainingTime);
     }
     
 }
