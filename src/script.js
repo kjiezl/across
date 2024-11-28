@@ -746,6 +746,10 @@ function winGame(){
     gameWon = true;
     winDOM.css("visibility", "visible");
     scene.remove(player);
+    sfx.timerSFX.stop();
+    sfx.timerEnd.stop();
+    sfx.death.stop();
+    sfx.laneReachedSFX.stop();
 }
 
 function gameOver(){
