@@ -25,6 +25,17 @@ button{
     visibility: hidden;
 }
 
+.credits-container{
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    position: absolute;
+    font-size: 9px;
+    padding: 5px;
+    /* visibility: hidden; */
+}
+
 #player-count{
     font-size: 10px;
 }
