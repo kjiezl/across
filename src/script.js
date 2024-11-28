@@ -7,6 +7,7 @@ const menuDOM = $(".main-menu-container");
 const timerEndDOM = $(".timer-end-container");
 // const prizeAmountDOM = $("#prize-amount");
 const playerCountDOM = $("#player-count");
+const winDOM = $(".win-container");
 
 const scene = new THREE.Scene();
 
@@ -48,6 +49,8 @@ let previousTimestamp;
 let startMoving;
 let moves;
 let stepStartTimestamp;
+
+var gameWon = false;
 
 const generateLanes = () =>
     [-9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -392,7 +395,7 @@ function Lane(index){
 
             this.occupiedPositions = new Set();
 
-            this.plants = [1, 2, 3, 4].map(() => {
+            this.plants = [1, 2, 3].map(() => {
                 const plant = new Plant1();
                 let position;
                 do {
@@ -528,7 +531,8 @@ $(window).keydown((event) => {
     // if(event.key === "=") playedCount++;
     if(inMenu) return;
     if(event.key == "p") pauseGame();
-    if(gamePaused || dead) return;
+    if(gamePaused || dead || gameWon) return;
+    if(startMoving) return;
     if (event.key == "w" || event.key == "ArrowUp") move("forward");
     else if (event.key == "s" || event.key == "ArrowDown") move("backward");
     else if (event.key == "a" || event.key == "ArrowLeft") move("left");
@@ -536,11 +540,11 @@ $(window).keydown((event) => {
 })
 
 function move(direction) {
-    for(let i = 0; i <= laneGoal.length; i++){
-        if(counterDOM.text() == laneGoal[i]){
-            if(!sfx.laneReachedSFX.playing()) sfx.laneReachedSFX.play();
-        }
-    }
+    // for(let i = 0; i <= laneGoal.length; i++){
+    //     if(counterDOM.text() == laneGoal[i]){
+    //         if(!sfx.laneReachedSFX.playing()) sfx.laneReachedSFX.play();
+    //     }
+    // }
     
     sfx.hop1.play();
     const finalPositions = moves.reduce(
@@ -582,7 +586,7 @@ function move(direction) {
         if (
             lanes[finalPositions.lane].type === "forest" &&
             lanes[finalPositions.lane].occupiedPositions.has(
-                finalPositions.column - 1
+                finalPositions.column - 1 
             )
         )
             return;
@@ -598,6 +602,10 @@ function move(direction) {
             return;
         if (!stepStartTimestamp) startMoving = true;
     }
+    // if(startMoving){
+    //     moves.push(direction);
+    // }
+
     moves.push(direction);
 }
 
@@ -713,6 +721,7 @@ function animate(timestamp) {
             const carMinX = vechicle.position.x - (vechicleLength * zoom) / 2;
             const carMaxX = vechicle.position.x + (vechicleLength * zoom) / 2;
             if (!dead && playerMaxX > carMinX && playerMinX < carMaxX){
+                if(gameWon) return;
                 gameOver();
             }
         });
@@ -722,9 +731,22 @@ function animate(timestamp) {
     // let result = calculatePrizeAmount(playedCount);
     // prizeAmountDOM.text("P " + Math.floor(result.prizeAmount));
     // playerCountDOM.text(playedCount);
+
+    if(counterDOM.text() == laneGoal){
+        winGame();
+        pauseGame();
+        pauseDOM.css("visibility", "hidden");
+        $(".score-text").text(counterDOM.text());
+    }
 }
 
 requestAnimationFrame(animate);
+
+function winGame(){
+    gameWon = true;
+    winDOM.css("visibility", "visible");
+    scene.remove(player);
+}
 
 function gameOver(){
     sfx.death.play();
@@ -756,15 +778,17 @@ function gotoMenu(){
 function restartGame(){
     sfx.click.play();
     if(gamePaused){
-        scene.remove(player);
+        if(!gameWon) scene.remove(player);
         dead = true;
         pauseGame();
         pauseDOM.css("visiblity", "hidden");
     }
     lanes.forEach((lane) => scene.remove(lane.mesh));
     spawnPlayer();
+    if(gameWon) winDOM.css("visibility", "hidden");
     timerEnded ? timerEndDOM.css("visibility", "hidden") : endDOM.css("visibility", "hidden");
     timerEnded = false;
+    gameWon = false;
     counterDOM.text(0);
 }
 
@@ -798,7 +822,7 @@ function startTimer(duration) {
     endTime = window.performance.now() + duration * 1000;
 
     function updateTimer() {
-        if(gamePaused) return;
+        if(gamePaused || gameWon) return;
         if(dead){
             sfx.timerSFX.stop();
             return; 
@@ -834,6 +858,7 @@ function startCountdown(lane, time, duration = 4) {
 
     function updateTimer() {
         if(gamePaused) return;
+        if(gameWon) return;
 
         const now = window.performance.now();
         remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
@@ -855,7 +880,7 @@ function pauseGame(){
     if(!gamePaused){
         gamePaused = true;
         if(sfx.timerSFX.stop());
-        pauseDOM.css("visibility", "visible");
+        if(!gameWon) pauseDOM.css("visibility", "visible");
         if(updateTimerReq) cancelAnimationFrame(updateTimerReq);
     } else{
         gamePaused = false;
