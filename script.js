@@ -126,32 +126,32 @@ var updateTimerReq;
 
 let sfx = {
     hop1: new Howl({
-        src: ["/sfx/hop2.wav"]
+        src: ["./sfx/hop2.wav"]
     }),
     death: new Howl({
-        src: ["/sfx/death2.mp3"],
+        src: ["./sfx/death2.mp3"],
         volume: 0.1
     }),
     click: new Howl({
-        src: ["/sfx/button-click.mp3"]
+        src: ["./sfx/button-click.mp3"]
     }),
     pause: new Howl({
-        src: ["/sfx/pause.wav"]
+        src: ["./sfx/pause.wav"]
     }),
     timerEnd: new Howl({
-        src: ["/sfx/timer-end.mp3"]
+        src: ["./sfx/timer-end.mp3"]
     }),
     timerSFX: new Howl({
-        src: ["/sfx/timer-count.mp3"]
+        src: ["./sfx/timer-count.mp3"]
     }),
     laneReachedSFX: new Howl({
-        src: ["/sfx/lane-reached.mp3"]
+        src: ["./sfx/lane-reached.mp3"]
     })
 }
 
 let bgm = {
     bgm1: new Howl({
-        src: ["/bgm/bgm1.mp3"]
+        src: ["./bgm/bgm1.mp3"]
     })
 }
 
