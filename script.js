@@ -732,7 +732,7 @@ function animate(timestamp) {
     // prizeAmountDOM.text("P " + Math.floor(result.prizeAmount));
     // playerCountDOM.text(playedCount);
 
-    if(counterDOM.text() == laneGoal){
+    if (!gameWon && Number(counterDOM.text()) === laneGoalNum) {
         winGame();
         pauseGame();
         pauseDOM.css("visibility", "hidden");
